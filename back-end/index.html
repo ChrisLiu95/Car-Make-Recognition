@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<!--
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sightengine demo - Python and Flask</title>
+</head>
+
+<body>
+<header class="navbar">
+  <form action="/upload" method="post" enctype="multipart/form-data" >
+      <span class="btn btn-default btn-file">
+        Browsedsdfsdf <input type="file" name="image">
+      </span>
+
+    <input type="submit" value="Upload your image" class="btn btn-primary">
+  </form>
+
+  <span class="navbar-text"> Image moderation with
+      <a href="https://sightengine.com/">Sightengine</a>
+  </span>
+</header>
+
+</body>
+</html>
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Car Image Recognition</title>
+
+    <link rel="icon" href="http://getbootstrap.com/favicon.ico">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    <style>body { padding-top:50px; }.navbar-inverse .navbar-nav > li > a { color: #FFFFFF; }</style>
+
+<!--
+    [if IE]>
+      <script src="https://cdn.jsdelivr.net/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/respond/1.4.2/respond.min.js"></script>
+    <![endif]
+-->
+  </head>
+
+  <body>
+
+    <div class="container">
+
+	    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	      <div class="container">
+	        <div class="navbar-header">
+	          <img src="https://venom-assets.edmunds-media.com/e15bd0b733f1d62081168f97c7941461.png" height="18" alt="Edmunds" class="navbar-brand">
+	          <a class="navbar-brand" href="https://www.edmunds.com" style="color:white; font-size: 16px">ICAY - Edmunds Intern Project</a>
+	        </div>
+	      </div>
+	    </nav>
+
+      <div style="max-width: 650px; margin: auto;">
+        <h1 class="page-header">Car Image Recognition</h1>
+        <p class="lead">Select a PNG or JPEG image, having maximum size <span id="max-size"></span> KB.</p>
+
+        <form id="upload-image-form" action="/upload" method="post" enctype="multipart/form-data">
+          <div id="image-preview-div" style="display: none">
+            <label for="exampleInputFile">Selected image:</label>
+            <br>
+            <img id="preview-img" src="noimage">
+          </div>
+          <div class="form-group">
+            <input type="file" name="image" id="file" required>
+          </div>
+          <button class="btn btn-lg btn-primary" id="upload-button" type="submit">Upload image</button>
+        </form>
+
+        <br>
+        <div class="alert alert-info" id="loading" style="display: none;" role="alert">
+          Uploading image...
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+            </div>
+          </div>
+        </div>
+        <div id="message"></div>
+      </div>
+
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script>
+		function noPreview() {
+		  $('#image-preview-div').css("display", "none");
+		  $('#preview-img').attr('src', 'noimage');
+		  $('upload-button').attr('disabled', '');
+		}
+		
+		function selectImage(e) {
+		  $('#file').css("color", "green");
+		  $('#image-preview-div').css("display", "block");
+		  $('#preview-img').attr('src', e.target.result);
+		  $('#preview-img').css('max-width', '550px');
+		}
+		
+
+		$(document).ready(function (e) {
+		
+		  var maxsize = 500 * 1024; // 500 KB
+		
+		  $('#max-size').html((maxsize/1024).toFixed(2));
+		
+/*
+		  $('#upload-image-form').on('submit', function(e) {
+		
+		    e.preventDefault();
+		
+		    $('#message').empty();
+		    $('#loading').show();
+		
+		    var myData = {
+		      "image_url":"https://images.ebizautos.com/foundation/Templates/-2147483596/images/porsche-718-cayman.jpg"
+		    }
+		
+		    $.ajax({
+		      url: "http://54.87.204.48/image",
+		      type: "POST",
+		      data: myData,
+		      contentType: "application/json",
+		      success: function()
+		      {
+		        alert("success!");
+		        // $('#loading').hide();
+		        // $('#message').html(data);
+		      }
+		    });
+	
+		  });
+*/
+		  $('#upload-button').click(function(){
+			  $('#loading').show();
+		  });
+		
+		  $('#file').change(function() {
+		
+		    $('#message').empty();
+		
+		    var file = this.files[0];
+		    var match = ["image/jpeg", "image/png", "image/jpg"];
+		
+		    if ( !( (file.type == match[0]) || (file.type == match[1]) || (file.type == match[2]) ) )
+		    {
+		      noPreview();
+		
+		      $('#message').html('<div class="alert alert-warning" role="alert">Unvalid image format. Allowed formats: JPG, JPEG, PNG.</div>');
+		
+		      return false;
+		    }
+		
+		    if ( file.size > maxsize )
+		    {
+		      noPreview();
+		
+		      $('#message').html('<div class=\"alert alert-danger\" role=\"alert\">The size of image you are attempting to upload is ' + (file.size/1024).toFixed(2) + ' KB, maximum size allowed is ' + (maxsize/1024).toFixed(2) + ' KB</div>');
+		
+		      return false;
+		    }
+		
+		    $('#upload-button').removeAttr("disabled");
+		
+		    var reader = new FileReader();
+		    reader.onload = selectImage;
+		    reader.readAsDataURL(this.files[0]);
+		
+		  });
+		
+		});
+
+	</script>
+	
+  </body>
+</html>
